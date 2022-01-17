@@ -10,5 +10,14 @@ With low code, KARTE user data can be stored in real time in various DBs such as
 ![Architecture for EventBridge Integration Solution for Amazon DynamoDB](images/arch-eventbridge-integration-plaid-karte-stepfunction-dynamodb.png)
 
 
+Your IAM user or role need to have the following IAM policies to deploy.
+
+```
+- AmazonDynamoDBFullAccess
+- CloudWatchLogdsFullAccess
+- AWSStepFunctionFullAccess
+- AmazonEventBridgeFullAccess
+```
+
 To post feedback, submit feature ideas, or report bugs, use the Issues section of this GitHub repo.
 

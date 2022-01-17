@@ -22,6 +22,7 @@ Metadata:
       - plaid
       - karte
     SemanticVersion: 0.1.0
+    SourceCodeUrl: https://github.com/plaidev/karte-severless-apps/tree/main/aws/eventbridge-integration-plaid-karte-stepfunction-dynamodb
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -38,7 +39,7 @@ Metadata:
 Parameters:
   EventSourceName:
     Type: String
-    AllowedPattern: ^aws\.partner\/karte\.io\.test(\/[\.\-_a-z0-9]+){3}$
+    AllowedPattern: ^aws\.partner\/karte\.io(\/[\.\-_a-z0-9]+){3}$
     MinLength: 1
     MaxLength: 256
     Description: Name of the Amazon EventBridge KARTE Event Source to associate with an Event Bus. For example, aws.partner/karte.io/{AWSAccountID}/{KARTEProjectId}/{AppName}
