@@ -1,0 +1,207 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "eventbridge-integration-plaid-karte-stepfunction-dynamodb\n"
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: Amazon-eventbridge-integration-plaid-karte-stepfunction-dynamodb
+    Description: This application demonstrates an integration with DynamoDB, StepFunction
+      and Lambda for Amazon EventBridge SaaS Partner PLAID
+    Author: PLAID
+    LicenseUrl: s3://production-sam-template-ap-northeast-1/c0085cc3556e692a8d47229001069025
+    ReadmeUrl: s3://production-sam-template-ap-northeast-1/d1f1262aa0b3a501cc3ad49130a31557
+    Labels:
+    - amazon
+    - eventbridge
+    - integration
+    - solution
+    - aws
+    - stepfunction
+    - lambda
+    - dynamodb
+    - plaid
+    - karte
+    SemanticVersion: 0.1.0
+    SourceCodeUrl: https://github.com/plaidev/karte-severless-apps/tree/main/aws/eventbridge-integration-plaid-karte-stepfunction-dynamodb
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Amazon EventBridge Integration Solution
+      Parameters:
+      - EventSourceName
+      - DyanamoDBTableName
+    ParameterLabels:
+      EventSourceName:
+        default: Event Source Name
+      DyanamoDBTableName:
+        default: mytable
+Parameters:
+  EventSourceName:
+    Type: String
+    AllowedPattern: ^aws\.partner\/karte\.io(\/[\.\-_a-z0-9]+){3}$
+    MinLength: 1
+    MaxLength: 256
+    Description: Name of the Amazon EventBridge KARTE Event Source to associate with
+      an Event Bus. For example, aws.partner/karte.io/{AWSAccountID}/{KARTEProjectId}/{AppName}
+  DyanamoDBTableName:
+    Description: Table name of DynamoDB
+    Type: String
+    Default: mytable
+Globals:
+  Function:
+    Timeout: 30
+    Environment:
+      Variables:
+        dynamodb_table_name:
+          Ref: DyanamoDBTableName
+Resources:
+  WriteToDBLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://production-sam-template-ap-northeast-1/d9a1aeea94ae73981837fd3c25da505b
+      Handler: writeToDB.handler
+      Runtime: nodejs14.x
+      Policies:
+      - AmazonDynamoDBFullAccess
+  StateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: KARTE-WriteToDB-StateMachine
+      DefinitionString: "{\n  \"Comment\": \"A description of my state machine\",\n\
+        \  \"StartAt\": \"WriteToDB\",\n  \"States\": {\n      \"WriteToDB\": {\n\
+        \          \"Type\": \"Task\",\n          \"Resource\": \"arn:aws:states:::lambda:invoke\"\
+        ,\n          \"OutputPath\": \"$.Payload\",\n          \"Parameters\": {\n\
+        \              \"Payload.$\": \"$\",\n              \"FunctionName\": \"${LambdaFunction}:$LATEST\"\
+        \n          },\n          \"End\": true\n      }\n  }\n}"
+      DefinitionSubstitutions:
+        LambdaFunction:
+          Fn::GetAtt:
+          - WriteToDBLambdaFunction
+          - Arn
+      RoleArn:
+        Fn::GetAtt:
+        - StateMachineRole
+        - Arn
+  StateMachineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Join:
+        - ''
+        - - /aws/states/
+          - Fn::GetAtt:
+            - StateMachine
+            - Name
+          - -Logs
+  StateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - states.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaRole
+      - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+  EventBridgeEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name:
+        Ref: EventSourceName
+      EventSourceName:
+        Ref: EventSourceName
+  EventBridgeRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: catch-all rule for event bus
+      EventBusName:
+        Ref: EventBridgeEventBus
+      EventPattern:
+        account:
+        - Ref: AWS::AccountId
+        detail-type:
+        - KARTE Action
+        detail:
+          name:
+          - _write_to_db_request
+      Name: write_to_db
+      State: ENABLED
+      Targets:
+      - Arn:
+          Fn::GetAtt:
+          - StateMachine
+          - Arn
+        Id:
+          Fn::GetAtt:
+          - StateMachine
+          - Name
+        RoleArn:
+          Fn::GetAtt:
+          - EventBridgeRole
+          - Arn
+  EventBridgeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - events.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess
+  DynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: user_id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: user_id
+        KeyType: HASH
+      TableName:
+        Ref: DyanamoDBTableName
+      TimeToLiveSpecification:
+        AttributeName: expired_at_unix_time
+        Enabled: true
+Outputs:
+  EventBridgeEventBus:
+    Description: SaaS Event Bus ARN
+    Value:
+      Fn::GetAtt:
+      - EventBridgeEventBus
+      - Arn
+  EventBridgeRule:
+    Description: EventBridge Rule ARN
+    Value:
+      Fn::GetAtt:
+      - EventBridgeRule
+      - Arn
+  WriteToDBLambdaFunction:
+    Description: WriteToDBLambdaFunction ARN
+    Value:
+      Fn::GetAtt:
+      - WriteToDBLambdaFunction
+      - Arn
+  DynamoDB:
+    Description: DynamoDB ARN
+    Value:
+      Fn::GetAtt:
+      - DynamoDB
+      - Arn
+  StateMachine:
+    Description: StateMachine ARN
+    Value:
+      Fn::GetAtt:
+      - StateMachine
+      - Arn
