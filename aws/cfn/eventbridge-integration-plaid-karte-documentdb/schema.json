@@ -1,0 +1,274 @@
+{
+    "typeName": "KARTE::EventBridge::DocumentDB::MODULE",
+    "description": "Schema for Module Fragment of type KARTE::EventBridge::DocumentDB::MODULE",
+    "properties": {
+        "Parameters": {
+            "type": "object",
+            "properties": {
+                "EventSourceName": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "Name of the Amazon EventBridge KARTE Event Source to associate with an Event Bus. For example, aws.partner/karte.io/{AWSAccountID}/{KARTEProjectId}/{AppName}"
+                },
+                "ClusterName": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "Cluster Name"
+                },
+                "MasterUsername": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "Master Username"
+                },
+                "MasterUserPassword": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "Master Password"
+                },
+                "SecurityGroupIds": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "Amazon MemoryDB Security Group Ids"
+                },
+                "SubnetIds": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "Amazon MemoryDB Subnet Ids"
+                },
+                "SubnetGroupName": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "Amazon MemoryDB DB Subnet Group Name"
+                },
+                "DBInstanceClass": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "The compute and memory capacity of the DB instance."
+                },
+                "DBName": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "Database name of DocumentDB"
+                },
+                "CollectionName": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string"
+                        },
+                        "Description": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Type",
+                        "Description"
+                    ],
+                    "description": "Collection name of DocumentDB"
+                }
+            }
+        },
+        "Resources": {
+            "properties": {
+                "SNSTopic": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string",
+                            "const": "AWS::SNS::Topic"
+                        },
+                        "Properties": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "WriteToDBLambdaFunction": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string",
+                            "const": "AWS::Lambda::Function"
+                        },
+                        "Properties": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "LambdaExecutionRole": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string",
+                            "const": "AWS::IAM::Role"
+                        },
+                        "Properties": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "EventBridgeEventBus": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string",
+                            "const": "AWS::Events::EventBus"
+                        },
+                        "Properties": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "EventBridgeRule": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string",
+                            "const": "AWS::Events::Rule"
+                        },
+                        "Properties": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "EventTopicPolicy": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string",
+                            "const": "AWS::SNS::TopicPolicy"
+                        },
+                        "Properties": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "DocumentDBCluster": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string",
+                            "const": "AWS::DocDB::DBCluster"
+                        },
+                        "Properties": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "DocumentDBInstance": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "type": "string",
+                            "const": "AWS::DocDB::DBInstance"
+                        },
+                        "Properties": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": true
+}

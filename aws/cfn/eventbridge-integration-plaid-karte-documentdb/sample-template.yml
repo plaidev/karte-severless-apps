@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Write to DocumentDB from KARTE"
+Resources:
+  KarteToDocumentDB:
+    Type: KARTE::EventBridge::DocumentDB::MODULE
+    Properties:
+      ClusterName: custom-doc
+      CollectionName: mycollection
+      DBInstanceClass: db.t3.medium
+      DBName: mydb
+      EventSourceName: "aws.partner/karte.io/XXXX/YYYY/ZZZZ"
+      MasterUserPassword: password
+      MasterUsername: user
+      SecurityGroupIds: 
+        - sg-XXXX
+      SubnetGroupName: XXXX
+      SubnetIds: 
+        - subnet-XXXX
+        - subnet-YYYY
